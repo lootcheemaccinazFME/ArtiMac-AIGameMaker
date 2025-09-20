@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow: hidden;
+        }
+
+        .titlebar {
+            height: 30px;
+            background: rgba(44, 44, 44, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            -webkit-app-region: drag;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .titlebar-title {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            flex: 1;
+            text-align: center;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 5px;
+            -webkit-app-region: no-drag;
+        }
+
+        .window-control-btn {
+            width: 20px;
+            height: 20px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .minimize-btn {
+            background: #ffbd2e;
+            color: #995700;
+        }
+
+        .maximize-btn {
+            background: #28ca42;
+            color: #0d5f20;
+        }
+
+        .close-btn {
+            background: #ff5f56;
+            color: #a02025;
+        }
+
+        .window-control-btn:hover {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+
+        .preview-container {
+            height: calc(100vh - 30px);
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+        }
+
+        .preview-header {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .asset-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .asset-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .preview-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .preview-content img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-content video {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .audio-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .audio-icon {
+            font-size: 80px;
+            opacity: 0.6;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .audio-controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .audio-controls audio {
+            width: 300px;
+            height: 40px;
+        }
+
+        .file-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .file-icon {
+            font-size: 80px;
+            opacity: 0.6;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .file-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 40px;
+            font-size: 16px;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 600px) {
+            .asset-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .audio-controls audio {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="titlebar">
+        <div class="titlebar-title" id="window-title">资源预览</div>
+        <div class="window-controls">
+            <button class="window-control-btn minimize-btn" id="minimize-btn" title="最小化">−</button>
+            <button class="window-control-btn maximize-btn" id="maximize-btn" title="最大化">□</button>
+            <button class="window-control-btn close-btn" id="close-btn" title="关闭">×</button>
+        </div>
+    </div>
+
+    <div class="preview-container">
+        <div class="preview-header">
+            <div class="asset-name" id="asset-name">加载中...</div>
+            <div class="asset-meta" id="asset-meta"></div>
+        </div>
+        
+        <div class="preview-content" id="preview-content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div>正在加载资源...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AssetPreviewer {
+            constructor() {
+                this.assetInfo = null;
+                this.init();
+            }
+
+            init() {
+                this.setupWindowControls();
+                this.setupAssetListener();
+            }
+
+            setupWindowControls() {
+                document.getElementById('minimize-btn').addEventListener('click', () => {
+                    window.electronAPI.minimizeWindow();
+                });
+
+                document.getElementById('maximize-btn').addEventListener('click', () => {
+                    window.electronAPI.maximizeWindow();
+                });
+
+                document.getElementById('close-btn').addEventListener('click', () => {
+                    window.electronAPI.closeWindow();
+                });
+            }
+
+            setupAssetListener() {
+                window.electronAPI.onAssetInfo((assetInfo) => {
+                    console.log('收到资源信息:', assetInfo);
+                    this.assetInfo = assetInfo;
+                    this.renderPreview();
+                });
+            }
+
+            renderPreview() {
+                if (!this.assetInfo) return;
+
+                const nameEl = document.getElementById('asset-name');
+                const metaEl = document.getElementById('asset-meta');
+                const contentEl = document.getElementById('preview-content');
+                const titleEl = document.getElementById('window-title');
+
+                // 更新标题和基本信息
+                titleEl.textContent = `资源预览 - ${this.assetInfo.name}`;
+                nameEl.textContent = this.assetInfo.name;
+
+                // 更新元数据
+                metaEl.innerHTML = this.renderMeta();
+
+                // 根据资源类型渲染内容
+                try {
+                    switch (this.assetInfo.type) {
+                        case 'image':
+                            this.renderImage(contentEl);
+                            break;
+                        case 'audio':
+                            this.renderAudio(contentEl);
+                            break;
+                        case 'video':
+                            this.renderVideo(contentEl);
+                            break;
+                        default:
+                            this.renderFile(contentEl);
+                            break;
+                    }
+                } catch (error) {
+                    console.error('渲染预览失败:', error);
+                    this.renderError(contentEl, error.message);
+                }
+            }
+
+            renderMeta() {
+                const meta = [];
+                
+                meta.push(`<div class="meta-item">
+                    <i>📁</i>
+                    <span>${this.getTypeLabel(this.assetInfo.type)}</span>
+                </div>`);
+
+                if (this.assetInfo.size) {
+                    meta.push(`<div class="meta-item">
+                        <i>💾</i>
+                        <span>${this.formatFileSize(this.assetInfo.size)}</span>
+                    </div>`);
+                }
+
+                if (this.assetInfo.lastModified) {
+                    const date = new Date(this.assetInfo.lastModified);
+                    meta.push(`<div class="meta-item">
+                        <i>📅</i>
+                        <span>${date.toLocaleString('zh-CN')}</span>
+                    </div>`);
+                }
+
+                if (this.assetInfo.metadata) {
+                    const { width, height, duration } = this.assetInfo.metadata;
+                    if (width && height) {
+                        meta.push(`<div class="meta-item">
+                            <i>📐</i>
+                            <span>${width}×${height}</span>
+                        </div>`);
+                    }
+                    if (duration) {
+                        meta.push(`<div class="meta-item">
+                            <i>⏱️</i>
+                            <span>${this.formatDuration(duration)}</span>
+                        </div>`);
+                    }
+                }
+
+                return meta.join('');
+            }
+
+            renderImage(container) {
+                const fileUrl = this.toFileUrl(this.assetInfo.absolutePath);
+                container.innerHTML = `
+                    <img src="${fileUrl}" 
+                         alt="${this.assetInfo.name}"
+                         onerror="this.parentElement.innerHTML='<div class=&quot;error-message&quot;>图片加载失败</div>'"
+                    />
+                `;
+            }
+
+            renderAudio(container) {
+                const fileUrl = this.toFileUrl(this.assetInfo.absolutePath);
+                container.innerHTML = `
+                    <div class="audio-preview">
+                        <div class="audio-icon">🎵</div>
+                        <div class="audio-controls">
+                            <audio controls>
+                                <source src="${fileUrl}" type="audio/mpeg">
+                                <source src="${fileUrl}" type="audio/wav">
+                                <source src="${fileUrl}" type="audio/ogg">
+                                您的浏览器不支持音频播放
+                            </audio>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderVideo(container) {
+                const fileUrl = this.toFileUrl(this.assetInfo.absolutePath);
+                container.innerHTML = `
+                    <video controls>
+                        <source src="${fileUrl}" type="video/mp4">
+                        <source src="${fileUrl}" type="video/webm">
+                        <source src="${fileUrl}" type="video/ogg">
+                        您的浏览器不支持视频播放
+                    </video>
+                `;
+            }
+
+            renderFile(container) {
+                const iconMap = {
+                    'text': '📄',
+                    'document': '📝',
+                    'archive': '📦',
+                    'default': '📄'
+                };
+
+                const icon = iconMap[this.assetInfo.category] || iconMap.default;
+
+                container.innerHTML = `
+                    <div class="file-preview">
+                        <div class="file-icon">${icon}</div>
+                        <div class="file-info">
+                            <div style="font-size: 18px; margin-bottom: 10px;">
+                                ${this.assetInfo.name}
+                            </div>
+                            <div style="opacity: 0.8;">
+                                ${this.getTypeLabel(this.assetInfo.type)} 文件
+                            </div>
+                            ${this.assetInfo.absolutePath ? `
+                                <div style="margin-top: 15px; font-size: 12px; opacity: 0.6; word-break: break-all;">
+                                    ${this.assetInfo.absolutePath}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderError(container, message) {
+                container.innerHTML = `
+                    <div class="error-message">
+                        ❌ ${message}
+                    </div>
+                `;
+            }
+
+            toFileUrl(filePath) {
+                if (!filePath) return '';
+                if (filePath.startsWith('file://')) return filePath;
+                const normalizedPath = filePath.replace(/\\/g, '/');
+                return normalizedPath.match(/^[a-zA-Z]:\//) 
+                    ? `file:///${normalizedPath}` 
+                    : `file://${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
+            }
+
+            getTypeLabel(type) {
+                const labels = {
+                    'image': '图片',
+                    'audio': '音频',
+                    'video': '视频',
+                    'text': '文本',
+                    'document': '文档',
+                    'archive': '压缩包',
+                    'other': '其他'
+                };
+                return labels[type] || '未知';
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+
+            formatDuration(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // 初始化预览器
+        new AssetPreviewer();
+    </script>
+</body>
+</html>

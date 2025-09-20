@@ -1,0 +1,48 @@
+# Node
+node_modules/
+.npmrc
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.iml
+
+# Build artifacts
+/dist/
+/build/
+/out/
+coverage/
+
+# Electron caches
+.electron-cache/
+**/dist/win-unpacked/
+**/dist/mac/
+**/dist/linux/
+**/*.asar
+**/*.asar.unpacked/
+
+# Temp
+.tmp/
+.temp/
+*.tmp
+
+# Player packaged outputs
+lib/player/dist/
+
+# Project outputs
+**/ArtiMeow-*/

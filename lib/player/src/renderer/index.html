@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtiMeow GalGame Player</title>
+    <!-- Font Awesome & Styles -->
+    <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/loader.css">
+    <link rel="stylesheet" href="styles/game-core.css">
+    <link rel="stylesheet" href="styles/game-ui.css">
+    <link rel="stylesheet" href="styles/game-effects.css">
+</head>
+<body>
+    <!-- 自定义标题栏 -->
+    <div class="titlebar">
+        <div class="titlebar-drag-region">
+            <div class="titlebar-title" id="game-title">ArtiMeow GalGame Player</div>
+        </div>
+        <div class="titlebar-controls">
+            <button class="titlebar-button minimize-btn" id="minimize-btn" title="最小化">
+                <i class="fa fa-window-minimize"></i>
+            </button>
+            <button class="titlebar-button maximize-btn" id="maximize-btn" title="最大化/还原">
+                <i class="fa fa-window-maximize"></i>
+            </button>
+            <button class="titlebar-button close-btn" id="close-btn" title="关闭">
+                <i class="fa fa-window-close"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div id="app">
+        <!-- 游戏主界面 -->
+        <div id="main-screen" class="screen active">
+            <!-- 主界面背景图片容器（避免与游戏界面重复ID） -->
+            <div id="main-background" class="game-background"></div>
+            
+            <!-- 游戏标题和开始界面 -->
+            <div class="game-title-screen">
+                <div class="game-logo">
+                    <h1 id="project-name">游戏名称</h1>
+                    <p id="project-description" class="game-subtitle">游戏描述</p>
+                </div>
+                
+                <div class="game-menu">
+                    <button id="start-game-btn" class="menu-btn primary">
+                        <i class="fas fa-play"></i>
+                        开始游戏
+                    </button>
+                    <button id="load-game-btn" class="menu-btn" style="display: none;">
+                        <i class="fas fa-folder-open"></i>
+                        读取存档
+                    </button>
+                    <button id="game-settings-btn" class="menu-btn">
+                        <i class="fas fa-gear"></i>
+                        游戏设置
+                    </button>
+                </div>
+                <div id="made-with" class="made-with">Made with ArtiMeow AI GalGame Maker</div>
+            </div>
+        </div>
+
+        <!-- 游戏界面 -->
+        <div id="game-screen" class="screen">
+            <!-- 时间线面板 -->
+            <div id="timeline-panel" class="timeline-panel" style="display: none;">
+                <div class="timeline-header">
+                    <h3>时间线</h3>
+                    <button id="timeline-close" class="btn-close" title="关闭"><i class="fa fa-xmark"></i></button>
+                </div>
+                <div id="timeline-content" class="timeline-content">
+                    <!-- 时间线节点将动态生成 -->
+                </div>
+            </div>
+
+            <!-- 主游戏区域 -->
+            <div class="game-area">
+                <!-- 背景图片 -->
+                <div id="game-background" class="game-background"></div>
+                
+                <!-- 顶部控制栏 -->
+                <div class="game-controls">
+                    <button id="timeline-btn" class="control-btn" title="时间线" style="display: none;">
+                        <i class="fa fa-chart-bar"></i>
+                    </button>
+                    <button id="game-music-btn" class="control-btn" title="音乐 播放/暂停">
+                        <i class="fa fa-music"></i>
+                    </button>
+                    <button id="back-to-main-btn" class="control-btn" title="返回主页">
+                        <i class="fa fa-house"></i>
+                    </button>
+                    <button id="game-settings-btn" class="control-btn" title="设置">
+                        <i class="fa fa-gear"></i>
+                    </button>
+                </div>
+
+                <!-- 文本显示区域 -->
+                <div id="text-area" class="text-area">
+                    <div id="dialogue-box" class="dialogue-box">
+                        <div id="nameplate" class="nameplate hidden">角色名</div>
+                        <div id="dialogue-text" class="dialogue-text"></div>
+                    </div>
+                    <div id="choices-container" class="choices-container hidden">
+                        <!-- 选择项将动态生成 -->
+                    </div>
+                    <div class="interaction-hint">
+                        <span id="space-hint">按空格继续</span>
+                        <span id="choice-hint" class="hidden">使用方向键或鼠标选择</span>
+                    </div>
+                                        <div class="hud-controls" style="display:none;">
+                                                <!-- 临时禁用：CUSTOM 和 SKIP 按钮 -->
+                                                <button id="btn-custom" class="hud-btn" title="自定义输入"><i class="fa fa-keyboard"></i> CUSTOM</button>
+                                                <div id="custom-input" class="custom-input hidden">
+                                                    <input id="custom-text" type="text" placeholder="输入你的想法/选择..." maxlength="200" />
+                                                    <button id="custom-submit" class="btn btn-primary btn-sm"><i class="fa fa-paper-plane"></i></button>
+                                                </div>
+                                                <button id="btn-skip" class="hud-btn" title="快进"><i class="fa fa-forward"></i> SKIP</button>
+                                        </div>
+                </div>
+
+                <!-- 科幻霓虹加载覆盖层（由 Loader 控制显示/隐藏） -->
+                <div id="loading-overlay" class="loading-overlay"></div>
+                <div id="scene-transition" class="scene-transition hidden"></div>
+            </div>
+        </div>
+
+        <!-- 调试控制面板 -->
+        <div id="debug-panel" class="debug-panel hidden">
+            <div class="debug-header">
+                <h3><i class="fas fa-bug"></i> 调试控制台</h3>
+                <button id="debug-close" class="btn-close" title="关闭"><i class="fa fa-xmark"></i></button>
+            </div>
+            <div class="debug-content">
+                <div class="debug-tabs">
+                    <button class="debug-tab active" data-tab="variables">变量</button>
+                    <button class="debug-tab" data-tab="chapters">章节</button>
+                    <button class="debug-tab" data-tab="editor">编辑器</button>
+                </div>
+                
+                <!-- 变量调试面板 -->
+                <div id="debug-variables" class="debug-tab-content active">
+                    <div class="debug-section">
+                        <h4>游戏变量</h4>
+                        <div id="variables-list" class="variables-list">
+                            <p class="no-variables">暂无变量</p>
+                        </div>
+                        <div class="variable-controls">
+                            <input type="text" id="var-name-input" placeholder="变量名" class="debug-input">
+                            <input type="text" id="var-value-input" placeholder="变量值" class="debug-input">
+                            <button id="add-variable-btn" class="debug-btn">添加/修改</button>
+                            <button id="clear-variables-btn" class="debug-btn danger">清空所有</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 章节调试面板 -->
+                <div id="debug-chapters" class="debug-tab-content">
+                    <div class="debug-section">
+                        <h4>章节导航</h4>
+                        <div class="current-chapter">
+                            <strong>当前章节：</strong>
+                            <span id="current-chapter-id">未选择</span>
+                        </div>
+                        <div class="chapter-controls">
+                            <input type="text" id="chapter-id-input" placeholder="章节ID" class="debug-input">
+                            <button id="jump-chapter-btn" class="debug-btn">跳转章节</button>
+                            <button id="reload-project-btn" class="debug-btn">重载项目</button>
+                        </div>
+                        <div id="chapters-list" class="chapters-list">
+                            <p class="no-chapters">项目未加载</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 编辑器通信面板 -->
+                <div id="debug-editor" class="debug-tab-content">
+                    <div class="debug-section">
+                        <h4>编辑器通信</h4>
+                        <div class="editor-status">
+                            <strong>连接状态：</strong>
+                            <span id="editor-connection-status" class="status-disconnected">未连接</span>
+                        </div>
+                        <div class="editor-controls">
+                            <button id="sync-to-editor-btn" class="debug-btn">同步状态到编辑器</button>
+                            <button id="request-chapter-btn" class="debug-btn">请求章节数据</button>
+                        </div>
+                        <div class="debug-log">
+                            <h5>调试日志</h5>
+                            <div id="debug-log-content" class="log-content">
+                                <p class="log-item">调试面板已初始化</p>
+                            </div>
+                            <button id="clear-log-btn" class="debug-btn small">清空日志</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 时间线查看器 -->
+        <div id="timeline-modal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3><i class="fas fa-project-diagram"></i> 游戏时间线</h3>
+                    <button class="btn-close" onclick="closeTimelineModal()" title="关闭"><i class="fa fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div id="timeline-canvas" class="timeline-canvas"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeTimelineModal()">关闭</button>
+                    <button type="button" id="jump-to-node-btn" class="btn btn-primary" style="display: none;">跳转到此节点</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关于对话框 -->
+        <div id="about-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>关于此游戏</h3>
+                    <button class="btn-close" onclick="closeAboutModal()" title="关闭"><i class="fa fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="about-content">
+                        <div class="about-logo"><i class="fa fa-gamepad"></i></div>
+                        <h4 id="about-game-title">游戏名称</h4>
+                        <p id="about-game-description" class="about-subtitle">游戏描述</p>
+                        <br>
+                        
+                        <div class="about-info">
+                            <div class="info-row">
+                                <strong>游戏版本：</strong><span id="game-version">1.0.0</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>作者：</strong><span id="game-author">Unknown</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>引擎版本：</strong><span id="engine-version">ArtiMeow Player 1.1.0</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Chrome版本：</strong><span id="chrome-version">-</span>
+                            </div>
+                        </div>
+                        
+                        <br>
+                        
+                        <div class="about-core-deps">
+                            <h5>核心依赖版本</h5>
+                            <div class="deps-list">
+                                <div class="dep-item">electron: <span>runtime</span></div>
+                                <div class="dep-item">fs-extra: <span>bundled</span></div>
+                                <div class="dep-item">music-metadata: <span>bundled</span></div>
+                            </div>
+                        </div>
+                        
+                        <br>
+                        
+                        <!-- 已移除固定的作者/许可证描述。可在发布设置中自定义 About 页面。 -->
+                        <br>
+                        <p class="about-description">这是一款由 ArtiMeow AI GalGame Maker 构建的游戏。</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="closeAboutModal()">确定</button>
+                </div>
+            </div>
+        </div>
+
+    <!-- 背景音乐模态框（本地播放禁用入口） -->
+    <div id="bg-music-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-music"></i> 背景音乐</h3>
+                    <button class="btn-close" onclick="closeBgMusicModal()" title="关闭"><i class="fa fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="music-controls">
+                        <!-- 播放控制 -->
+                        <div class="control-section">
+                            <h5><i class="fas fa-play"></i> 播放控制</h5>
+                            <div class="control-buttons">
+                                <button id="music-play-btn" class="btn btn-primary" disabled>
+                                    <i class="fas fa-play"></i>
+                                    播放
+                                </button>
+                                <button id="music-pause-btn" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-pause"></i>
+                                    暂停
+                                </button>
+                                <button id="music-stop-btn" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-stop"></i>
+                                    停止
+                                </button>
+                                <button id="music-next-btn" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-step-forward"></i>
+                                    下一首
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 当前播放 -->
+                        <div class="current-track">
+                            <h5><i class="fas fa-music"></i> 当前播放</h5>
+                            <div id="current-track-info" class="track-info">
+                                <div class="track-name">暂无播放</div>
+                                <div class="track-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill"></div>
+                                    </div>
+                                    <div class="progress-time">00:00 / 00:00</div>
+                                </div>
+                            </div>
+                            <div class="volume-control">
+                                <i class="fas fa-volume-up"></i>
+                                <input type="range" id="volume-slider" min="0" max="100" value="50">
+                                <span id="volume-value">50%</span>
+                            </div>
+                        </div>
+
+                        <!-- 播放列表 -->
+                        <div class="playlist-section">
+                            <h5><i class="fas fa-list"></i> 播放列表</h5>
+                            <div class="playlist-actions">
+                                <button id="add-music-btn" class="btn btn-secondary">
+                                    <i class="fas fa-plus"></i>
+                                    添加音乐
+                                </button>
+                                <button id="clear-playlist-btn" class="btn btn-outline">
+                                    <i class="fas fa-trash"></i>
+                                    清空列表
+                                </button>
+                                <button id="import-playlist-btn" class="btn btn-outline">
+                                    <i class="fas fa-file-import"></i>
+                                    导入播放列表
+                                </button>
+                                <button id="export-playlist-btn" class="btn btn-outline">
+                                    <i class="fas fa-file-export"></i>
+                                    导出播放列表
+                                </button>
+                            </div>
+                            <div id="playlist" class="playlist">
+                                <div class="empty-playlist">
+                                    <i class="fas fa-music opacity-50"></i>
+                                    <p>播放列表为空</p>
+                                    <p class="text-muted">点击"添加音乐"来添加音频文件</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 播放设置 -->
+                        <div class="playback-settings">
+                            <h5><i class="fas fa-cog"></i> 播放设置</h5>
+                            <div class="settings-grid">
+                                <div class="setting-item">
+                                    <label>循环模式：</label>
+                                    <select id="loop-mode-select">
+                                        <option value="none">不循环</option>
+                                        <option value="single">单曲循环</option>
+                                        <option value="playlist">列表循环</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label>播放模式：</label>
+                                    <select id="play-mode-select">
+                                        <option value="order">顺序播放</option>
+                                        <option value="random">随机播放</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label>音频引擎：</label>
+                                    <select id="audio-engine-select">
+                                        <option value="electron">Electron默认</option>
+                                        <option value="directsound">DirectSound</option>
+                                        <option value="wasapi">WASAPI</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label>
+                                        <input type="checkbox" id="auto-play-check">
+                                        自动播放下一首
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 播放信息面板 -->
+                    <div class="music-metadata-panel" id="music-metadata-panel">
+                        <div class="metadata-header">
+                            <i class="fa fa-info-circle"></i>
+                            <span>播放信息</span>
+                        </div>
+                        <div class="metadata-content" id="music-metadata-content">
+                            <div class="metadata-item">
+                                <span class="metadata-label">文件名：</span>
+                                <span class="metadata-value" id="metadata-filename">未选择文件</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">音频引擎：</span>
+                                <span class="metadata-value" id="metadata-engine">Electron默认</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">位深度：</span>
+                                <span class="metadata-value" id="metadata-bitdepth">16位</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">采样率：</span>
+                                <span class="metadata-value" id="metadata-samplerate">44.1 kHz</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeBgMusicModal()">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                <!-- 全局遮罩（首页封面生成等场景） -->
+        <div id="global-overlay" class="global-overlay hidden">
+            <div class="overlay-content">
+                <div class="spinner"></div>
+                <div class="overlay-text">处理中...</div>
+            </div>
+        </div>
+
+                <!-- 浮动面板：图谱 -->
+                <div id="graph-panel" class="panel-floating">
+                    <div class="panel-header">
+                        <strong><i class="fa fa-diagram-project"></i> 故事图谱</strong>
+                        <button class="btn-close" onclick="document.getElementById('graph-panel').classList.remove('active')"><i class="fa fa-xmark"></i></button>
+                    </div>
+                    <div class="panel-body">
+                        <div id="graph-canvas" class="graph-canvas"></div>
+                    </div>
+                </div>
+
+                <!-- 浮动面板：里程碑 -->
+                <div id="milestones-panel" class="panel-floating">
+                    <div class="panel-header">
+                        <strong><i class="fa fa-flag"></i> 章节里程碑</strong>
+                        <button class="btn-close" onclick="document.getElementById('milestones-panel').classList.remove('active')"><i class="fa fa-xmark"></i></button>
+                    </div>
+                    <div id="milestones-body" class="panel-body"></div>
+                </div>
+
+    <script src="vendor/cytoscape/cytoscape.min.js"></script>
+    <script src="js/path-utils.js"></script>
+    <script src="js/music-visualizer.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/background-manager.js"></script>
+    <script src="js/project-manager.js"></script>
+    <script src="js/game-engine.js"></script>
+    <script src="js/ai-service.js"></script>
+    <script src="js/timeline.js"></script>
+    <script src="js/project-details.js"></script>
+    <script src="js/loader.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

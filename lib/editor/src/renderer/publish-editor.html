@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>发布文件编辑器</title>
+  <link rel="stylesheet" href="../../../player/src/renderer/vendor/fontawesome/css/all.min.css">
+  <style>
+    :root{--pe-bg:#0d1117;--pe-panel:#0b0f14;--pe-border:#30363d;--pe-text:#c9d1d9;--pe-muted:#8b949e;--pe-accent:#1f6feb;--pe-accent-rgb:31,111,235;--pe-hover:#1b2330;--pe-gutter:#0b0f14;--pe-thumb:#30363d;--pe-thumb-hover:#484f58}
+    /* 轻主题映射为自包含变量，避免依赖外部 --primary-* */
+    body.light-theme{--pe-bg:#ffffff;--pe-panel:#f8f9fa;--pe-border:#dee2e6;--pe-text:#212529;--pe-muted:#6c757d;--pe-accent:#1f6feb;--pe-accent-rgb:31,111,235;--pe-hover:#e9ecef;--pe-gutter:#f1f3f5;--pe-thumb:#ced4da;--pe-thumb-hover:#adb5bd}
+    html,body{height:100%}
+  body{margin:0;background:var(--pe-bg);color:var(--pe-text);font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial; overflow:hidden}
+  .title{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--pe-border);background:var(--pe-panel);-webkit-app-region: drag}
+    .window-actions{margin-left:auto;display:flex;gap:6px;-webkit-app-region: no-drag}
+  .win-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--pe-border);background:var(--pe-panel);color:var(--pe-text);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .win-btn:hover{background:var(--pe-hover)}
+  .title .path{color:var(--pe-muted);font-size:12px}
+    .container{display:grid; grid-template-columns: 280px 1fr; height: calc(100vh - 48px)}
+  .sidebar{border-right:1px solid var(--pe-border); overflow:auto}
+  .toolbar{display:flex;gap:8px;padding:8px;border-bottom:1px solid var(--pe-border);background:var(--pe-panel);align-items:center}
+  .btn{background:var(--pe-accent);color:#fff;border:0;border-radius:6px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .btn.secondary{background:var(--pe-border);color:var(--pe-text)}
+  .btn.outline{background:transparent;border:1px solid var(--pe-border);color:var(--pe-text)}
+    .btn.icon{width:30px;height:30px;padding:0}
+  /* 确保图标继承当前文字颜色（浅色主题可见） */
+  .btn i{color:currentColor}
+  .tree{padding:6px 0}
+  .tree .row{display:flex;align-items:center;gap:6px;padding:3px 8px;border-radius:4px;cursor:pointer;user-select:none}
+  .tree .row:hover{background:var(--pe-hover)}
+  .tree .row.active{background:rgba(var(--pe-accent-rgb),0.15)}
+  .tree .indent{width:14px;flex:0 0 14px}
+  .tree .twisty{width:14px;flex:0 0 14px;color:var(--pe-muted);text-align:center}
+  .tree .twisty.hidden{visibility:hidden}
+  .tree .icon{width:16px;text-align:center;color:var(--pe-muted)}
+  .tree .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tree .children{display:none}
+  .tree .folder.open > .children{display:block}
+    .editor{display:grid; grid-template-rows: auto 1fr auto; height:100%; min-height:0}
+  .editor-area{height:100%; min-height:0; display:grid; grid-template-columns: 56px 1fr; overflow:hidden}
+  .gutter{background:var(--pe-gutter);border-right:1px solid var(--pe-border);color:var(--pe-muted)}
+  .gutter pre{margin:0;padding:12px;line-height:1.6;font-family:Consolas,'Fira Code',ui-monospace,SFMono-Regular,Menlo,Monaco,'Courier New',monospace;font-size:13px}
+  .editor-pane{position:relative; overflow:hidden}
+  textarea{display:block;width:100%;height:100%;min-height:100%;background:var(--pe-bg);color:var(--pe-text);border:0;outline:none;resize:none;overflow:auto;font-family: Consolas, 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace; font-size:13px; line-height:1.6; padding:12px; white-space:pre}
+  /* 自定义滚动条样式（Chromium/WebKit） */
+  textarea::-webkit-scrollbar{ width:10px }
+  textarea::-webkit-scrollbar-track{ background:var(--pe-panel) }
+  textarea::-webkit-scrollbar-thumb{ background:var(--pe-thumb); border-radius:8px; border:2px solid var(--pe-panel) }
+  textarea::-webkit-scrollbar-thumb:hover{ background:var(--pe-thumb-hover) }
+  .statusbar{display:flex;gap:12px;align-items:center;padding:6px 10px;border-top:1px solid var(--pe-border);background:var(--pe-panel);color:var(--pe-muted);font-size:12px}
+  .save-indicator{color:var(--pe-muted)}
+  .save-indicator.unsaved{color:#ffa657}
+  .save-indicator.saved{color:#3fb950}
+    .search{display:flex;gap:6px}
+  input[type="text"], input[type="search"]{background:var(--pe-bg);border:1px solid var(--pe-border);border-radius:6px;color:var(--pe-text);padding:6px 8px}
+    .spacer{flex:1}
+
+    /* modal */
+  .modal-mask{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000}
+  .modal{width:420px;max-width:90vw;background:var(--pe-panel);border:1px solid var(--pe-border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .modal header{padding:10px 12px;border-bottom:1px solid var(--pe-border);font-weight:600}
+    .modal .body{padding:12px}
+  .modal .footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 12px;border-top:1px solid var(--pe-border)}
+    .modal input{width:100%;box-sizing:border-box;max-width:100%}
+  </style>
+</head>
+<body>
+  <div class="title">
+    <strong>发布文件编辑器</strong>
+    <span class="path" id="root-path">-</span>
+    <div class="window-actions">
+      <button class="win-btn" id="win-min"><i class="fas fa-minus"></i></button>
+      <button class="win-btn" id="win-close"><i class="fas fa-xmark"></i></button>
+    </div>
+  </div>
+  <div class="container">
+    <div class="sidebar">
+      <div class="toolbar">
+        <button class="btn icon" id="btn-refresh" title="刷新"><i class="fas fa-rotate"></i></button>
+        <button class="btn icon secondary" id="btn-new" title="新建文件"><i class="fas fa-file-circle-plus"></i></button>
+        <button class="btn icon secondary" id="btn-new-folder" title="新建文件夹"><i class="fas fa-folder-plus"></i></button>
+        <button class="btn icon outline" id="btn-rename" title="重命名(F2)"><i class="fas fa-i-cursor"></i></button>
+        <button class="btn icon outline" id="btn-delete" title="删除"><i class="fas fa-trash"></i></button>
+        <button class="btn icon outline" id="btn-reveal" title="在资源管理器中显示"><i class="fas fa-folder-open"></i></button>
+      </div>
+      <div class="tree" id="file-tree"></div>
+    </div>
+    <div class="editor">
+      <div class="toolbar">
+        <div class="search">
+          <input type="search" id="find" placeholder="查找 (Ctrl+F)" />
+          <input type="text" id="replace" placeholder="替换 (Ctrl+H)" />
+          <button class="btn icon outline" id="btn-find" title="查找"><i class="fas fa-magnifying-glass"></i></button>
+          <button class="btn icon outline" id="btn-replace" title="替换"><i class="fas fa-arrows-rotate"></i></button>
+        </div>
+        <div class="spacer"></div>
+        <div id="save-indicator" class="save-indicator">未保存</div>
+        <button class="btn icon outline" id="btn-goto" title="转到行"><i class="fas fa-arrow-down-1-9"></i></button>
+        <label style="display:flex;align-items:center;gap:6px;color:var(--pe-muted);font-size:12px;">
+          <input type="checkbox" id="toggle-wrap" /> 自动换行
+        </label>
+  <button class="btn icon outline" id="btn-save-as" title="另存为"><i class="fas fa-file-export"></i></button>
+  <button class="btn icon" id="btn-save" title="保存(Ctrl+S)"><i class="fas fa-save"></i></button>
+      </div>
+      <div class="editor-area" id="editor-area">
+        <div class="gutter"><pre id="gutter">1\n</pre></div>
+        <div class="editor-pane" id="editor-pane">
+          <textarea id="editor" placeholder="在此编辑文件..."></textarea>
+        </div>
+      </div>
+      <div class="statusbar">
+        <div id="status">就绪</div>
+  <div id="current-file" style="margin-left:16px;color:var(--pe-text)"></div>
+        <div id="cursor">0:0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- modals -->
+  <div class="modal-mask" id="modal-mask">
+    <div class="modal" role="dialog" aria-modal="true">
+      <header id="modal-title">输入</header>
+      <div class="body">
+  <div id="modal-message" style="margin-bottom:8px;color:var(--pe-muted);font-size:13px;">请输入内容</div>
+        <input type="text" id="modal-input" placeholder="" />
+      </div>
+      <div class="footer">
+        <button class="btn secondary" id="modal-cancel">取消</button>
+        <button class="btn" id="modal-ok">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/publish-editor.js"></script>
+</body>
+</html>

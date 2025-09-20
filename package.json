@@ -1,0 +1,85 @@
+{
+  "name": "artimeow-ai-galgame-maker",
+  "version": "1.0.0",
+  "description": "ArtiMeow AI GalGame Maker - Professional Visual Novel Development Tool",
+  "main": "main.js",
+  "scripts": {
+    "start": "chcp 65001 && electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "build": "node scripts/build-verbose.js",
+    "build-win": "node scripts/build-verbose.js --win",
+    "build-mac": "node scripts/build-verbose.js --mac",
+    "build-linux": "node scripts/build-verbose.js --linux",
+    "build:all": "node scripts/build-verbose.js --win --mac --linux",
+    "pack": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "build": {
+    "appId": "org.b5-software.artimeow-ai-galgame-maker",
+    "productName": "ArtiMeow AI GalGame Maker",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "lib/**/*",
+      "node_modules/**/*",
+      "!node_modules/.cache/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "lib/editor/tutorial",
+        "to": "tutorial"
+      }
+    ],
+    "asarUnpack": [
+      "lib/editor/src/icon/**/*",
+      "lib/editor/tutorial/**/*",
+      "lib/player/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "lib/editor/src/icon/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "lib/editor/src/renderer/assets/icons/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "lib/editor/src/renderer/assets/icons/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "keywords": [
+    "galgame",
+    "visual novel",
+    "game development",
+    "ai",
+    "electron"
+  ],
+  "author": "ArtiMeow Team",
+  "license": "B5-Software",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "axios": "^1.10.0",
+    "diff": "^8.0.2",
+    "electron-store": "^10.1.0",
+    "extract-zip": "^2.0.1",
+    "fs-extra": "^11.3.1",
+    "highlight.js": "^11.11.1",
+    "marked": "^16.0.0",
+    "music-metadata": "^11.8.3",
+    "path": "^0.12.7"
+  }
+}

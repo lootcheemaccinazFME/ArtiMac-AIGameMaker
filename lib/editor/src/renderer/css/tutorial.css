@@ -1,0 +1,462 @@
+/* 教程模态框基础样式 */
+.tutorial-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-modal);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.tutorial-modal.show {
+    display: flex !important;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 教程模态框样式 */
+.tutorial-modal-content {
+    width: 95%;
+    max-width: 1200px;
+    height: auto;
+    min-height: 60vh;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-large);
+}
+
+.tutorial-modal-body {
+    flex: 1;
+    padding: 0;
+    overflow: hidden; /* 移除滚动，让子元素各自管理滚动 */
+    min-height: 400px;
+    display: flex; /* 确保正确的flex布局 */
+    flex-direction: column; /* 垂直布局 */
+}
+
+.tutorial-container {
+    display: flex;
+    flex: 1; /* 占满父容器的剩余空间 */
+    min-height: 0; /* 允许收缩 */
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* 教程侧边栏 */
+.tutorial-sidebar {
+    width: 300px;
+    background: var(--bg-tertiary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0; /* 允许收缩 */
+}
+
+.tutorial-search {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.tutorial-search input {
+    width: 100%;
+    padding: 10px 35px 10px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 14px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.tutorial-search input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+}
+
+.tutorial-search input::placeholder {
+    color: var(--text-muted);
+}
+
+.tutorial-search i {
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.tutorial-nav {
+    flex: 1;
+    overflow-y: auto; /* 确保侧边栏列表可以独立滚动 */
+    padding: 10px 0;
+    min-height: 0; /* 允许收缩，配合flex: 1使用 */
+}
+
+.tutorial-list {
+    padding: 0 10px;
+}
+
+.tutorial-item {
+    padding: 12px 15px;
+    margin: 2px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.tutorial-item:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(5px);
+    border-left-color: var(--primary-color);
+}
+
+.tutorial-item.active {
+    background: var(--primary-color);
+    color: white;
+    border-left-color: var(--primary-dark);
+    transform: translateX(5px);
+}
+
+.tutorial-item-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.tutorial-item-number {
+    font-size: 12px;
+    opacity: 0.7;
+    font-weight: 400;
+}
+
+.tutorial-item.active .tutorial-item-number {
+    opacity: 0.9;
+}
+
+/* 教程内容区域 */
+.tutorial-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    overflow: hidden;
+    min-height: 0; /* 允许收缩 */
+}
+
+.tutorial-breadcrumb {
+    padding: 15px 20px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.tutorial-viewer {
+    flex: 1;
+    overflow-y: auto; /* 确保内容区域可以独立滚动 */
+    padding: 20px;
+    min-height: 0; /* 允许收缩，配合flex: 1使用 */
+    background: var(--bg-primary);
+    border-radius: 8px;
+    margin: 0;
+}
+
+.tutorial-viewer-content {
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.tutorial-welcome {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.tutorial-welcome h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.tutorial-welcome p {
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+/* Markdown 内容样式 */
+.tutorial-viewer-content h1 {
+    color: var(--text-primary);
+    font-size: 28px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.tutorial-viewer-content h2 {
+    color: var(--text-primary);
+    font-size: 22px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.tutorial-viewer-content h3 {
+    color: var(--text-secondary);
+    font-size: 18px;
+    margin-top: 25px;
+    margin-bottom: 12px;
+}
+
+.tutorial-viewer-content h4 {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.tutorial-viewer-content p {
+    margin-bottom: 15px;
+    color: var(--text-primary);
+}
+
+.tutorial-viewer-content ul, 
+.tutorial-viewer-content ol {
+    margin-bottom: 15px;
+    padding-left: 25px;
+}
+
+.tutorial-viewer-content li {
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.tutorial-viewer-content blockquote {
+    border-left: 4px solid var(--primary-color);
+    padding-left: 20px;
+    margin: 20px 0;
+    font-style: italic;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: 15px 20px;
+    border-radius: 0 8px 8px 0;
+}
+
+.tutorial-viewer-content code {
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: var(--primary-light);
+}
+
+.tutorial-viewer-content pre {
+    background: var(--bg-tertiary);
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 15px 0;
+    border: 1px solid var(--border-color);
+}
+
+.tutorial-viewer-content pre code {
+    background: none;
+    padding: 0;
+    color: var(--text-primary);
+}
+
+.tutorial-viewer-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-medium);
+}
+
+.tutorial-viewer-content th,
+.tutorial-viewer-content td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.tutorial-viewer-content th {
+    background: var(--bg-tertiary);
+    font-weight: 600;
+    color: var(--primary-light);
+}
+
+.tutorial-viewer-content tr:last-child td {
+    border-bottom: none;
+}
+
+.tutorial-viewer-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+    box-shadow: var(--shadow-medium);
+}
+
+/* 交叉引用链接样式 */
+.tutorial-viewer-content a {
+    color: var(--primary-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 2px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.tutorial-viewer-content a:hover {
+    background: var(--bg-tertiary);
+    text-decoration: underline;
+}
+
+.tutorial-viewer-content a.cross-reference {
+    background: var(--bg-tertiary);
+    padding: 4px 8px;
+    border-radius: 15px;
+    font-size: 14px;
+    display: inline-block;
+    margin: 2px;
+    color: var(--text-primary);
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+}
+
+.tutorial-viewer-content a.cross-reference:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-small);
+}
+
+/* 滚动条样式 */
+.tutorial-nav::-webkit-scrollbar,
+.tutorial-viewer::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tutorial-nav::-webkit-scrollbar-track,
+.tutorial-viewer::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+.tutorial-nav::-webkit-scrollbar-thumb,
+.tutorial-viewer::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 3px;
+}
+
+.tutorial-nav::-webkit-scrollbar-thumb:hover,
+.tutorial-viewer::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .tutorial-container {
+        flex-direction: column;
+    }
+    
+    .tutorial-sidebar {
+        width: 100%;
+        height: 200px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .tutorial-content {
+        flex: 1;
+    }
+}
+
+/* 加载动画 */
+.tutorial-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: var(--primary-color);
+}
+
+.tutorial-loading i {
+    margin-right: 10px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 错误提示样式 */
+.tutorial-error {
+    text-align: center;
+    padding: 40px;
+    color: var(--danger-color);
+}
+
+.tutorial-error h3 {
+    margin-bottom: 10px;
+    color: var(--danger-color);
+}
+
+.tutorial-error p {
+    color: var(--text-muted);
+    margin-bottom: 0;
+}
+
+/* 搜索结果高亮 */
+.tutorial-item.search-match {
+    background: var(--warning-color);
+    border-left-color: var(--warning-color);
+    color: var(--text-inverse);
+}
+
+.tutorial-item.search-match:hover {
+    opacity: 0.9;
+}
+
+/* 目录特殊样式 */
+.tutorial-item.directory {
+    background: var(--bg-tertiary);
+    border-left-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.tutorial-item.directory:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.tutorial-item.directory.active {
+    background: var(--primary-color);
+    color: white;
+}
