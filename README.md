@@ -12,7 +12,7 @@ ArtiMeow 是一个“编辑器 + 播放器”的视觉小说/GalGame 创作与�
 
 在开始之前，请先安装 Node.js 的最新 LTS 版本（建议从 https://nodejs.org/ 下载）。安装完成后可在终端运行以下命令确认：
 
-```powershell
+```
 node -v
 npm -v
 ```
@@ -22,14 +22,13 @@ npm -v
 ## 快速开始（编辑器）
 1) 安装依赖
 
-```powershell
-cd lib/editor
+```
 npm install
 ```
 
 2) 启动编辑器开发模式
 
-```powershell
+```
 npm run dev
 ```
 
@@ -41,13 +40,6 @@ npm run dev
   - 执行 `npm install` 与 `npm run dist`
   - 在输出目录生成可分发产物
 
-若你只想本地验证播放器：
-
-```powershell
-cd lib/player
-npm install
-npm run dev
-```
 
 ## 图片生成配置
 - 打开“设置 → 图片AI”，填写兼容 OpenAI Images API 的 `Base URL`、`API Key` 与 `模型`。
