@@ -1,6 +1,6 @@
 {
   "name": "artimeow-ai-galgame-maker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ArtiMeow AI GalGame Maker - Professional Visual Novel Development Tool",
   "main": "main.js",
   "scripts": {
@@ -63,8 +63,8 @@
     "ai",
     "electron"
   ],
-  "author": "ArtiMeow Team",
-  "license": "B5-Software",
+  "author": "B5-Software",
+  "license": "B5-Software Free and Open Knowledge Public License Version 1.0-Permissive",
   "devDependencies": {
     "cross-env": "^7.0.3",
     "electron": "^38.0.0",

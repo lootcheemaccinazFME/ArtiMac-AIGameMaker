@@ -1,6 +1,6 @@
 {
   "name": "artimeow-galgame-player",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ArtiMeow GalGame Player minimal dependencies for preview and build.",
   "main": "src/main.js",
   "dependencies": {
