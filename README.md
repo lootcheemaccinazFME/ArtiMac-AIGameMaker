@@ -55,3 +55,7 @@ npm run dev
 
 ## 反馈
 - 发现问题或有功能建议，欢迎提交Issues。
+
+## Android 版本
+
+Android 版将编辑器和播放器界面打包在同一个 APK 中。构建要求、项目导入方式及 Android 版功能限制见 [`android/README.md`](android/README.md)。

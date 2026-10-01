@@ -101,6 +101,8 @@
           return () => () => {};
         }
         const channel = aliases[property] || property.replace(/[A-Z]/g, c => `-${c.toLowerCase()}`);
+        if (prefix === 'dialog') return (...args) => call(channel, args);
+        if (prefix === 'path') return (...args) => call('app-get-path', args.length ? args : ['userData']);
         return (...args) => call(prefix ? `${prefix}-${channel}` : channel, args);
       }
     });

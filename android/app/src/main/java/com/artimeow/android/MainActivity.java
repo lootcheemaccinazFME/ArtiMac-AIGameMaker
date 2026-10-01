@@ -308,9 +308,15 @@ public final class MainActivity extends Activity {
 
         if (channel.equals("path-exists") || channel.equals("fs-exists")) return safeFile(a.optString(0)).exists();
         if (channel.equals("read-file") || channel.equals("fs-read-file")) {
-            return new String(readBytes(safeFile(a.optString(0))), StandardCharsets.UTF_8);
+            String content = new String(readBytes(safeFile(a.optString(0))), StandardCharsets.UTF_8);
+            return channel.equals("read-file")
+                ? new JSONObject().put("success", true).put("content", content) : content;
         }
-        if (channel.equals("read-json-file") || channel.equals("fs-read-json")) {
+        if (channel.equals("read-json-file")) {
+            return new JSONObject().put("success", true).put("data",
+                new JSONObject(new String(readBytes(safeFile(a.optString(0))), StandardCharsets.UTF_8)));
+        }
+        if (channel.equals("fs-read-json")) {
             return new JSONObject(new String(readBytes(safeFile(a.optString(0))), StandardCharsets.UTF_8));
         }
         if (channel.equals("write-file")) {
@@ -331,7 +337,7 @@ public final class MainActivity extends Activity {
             if (files != null) for (File file : files) list.put(file.getName());
             return list;
         }
-        if (channel.equals("scan-directory")) return scanDirectory(safeFile(a.optString(0)), false);
+        if (channel.equals("scan-directory")) return scanFiles(safeFile(a.optString(0)), new JSONArray());
         if (channel.equals("scan-directory-with-dirs")) return scanDirectory(safeFile(a.optString(0)), true);
         if (channel.equals("get-file-stats") || channel.equals("fs-stat")) {
             File file = safeFile(a.optString(0));
@@ -391,6 +397,7 @@ public final class MainActivity extends Activity {
             .put("characters", new JSONArray()).put("variables", new JSONObject())
             .put("settings", new JSONObject().put("music", new JSONObject()).put("ui", new JSONObject()));
         writeJson(new File(dataDir, "project.json"), project);
+        writeJson(new File(folder, "metadata.json"), info);
         return new JSONObject().put("success", true).put("projectPath", folder.getAbsolutePath());
     }
 
@@ -431,6 +438,15 @@ public final class MainActivity extends Activity {
         JSONObject project = new JSONObject(new String(readBytes(metadata.isFile() ? metadata : projectFile), StandardCharsets.UTF_8));
         project.put("path", dir.getAbsolutePath()).put("metadata", project);
         return new JSONObject().put("success", true).put("project", project).put("content", "");
+    }
+
+    private JSONArray scanFiles(File dir, JSONArray result) {
+        File[] files = dir.listFiles();
+        if (files != null) for (File file : files) {
+            if (file.isDirectory()) scanFiles(file, result);
+            else result.put(file.getAbsolutePath().replace(File.separatorChar, '/'));
+        }
+        return result;
     }
 
     private JSONArray scanDirectory(File dir, boolean includeDirectories) {
