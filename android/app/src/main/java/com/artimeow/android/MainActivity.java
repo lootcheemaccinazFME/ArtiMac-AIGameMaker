@@ -333,7 +333,7 @@ public final class MainActivity extends Activity {
         }
         if (channel.equals("ensure-dir") || channel.equals("create-directory") || channel.equals("fs-ensure-dir")) {
             safeFile(a.optString(0)).mkdirs();
-            return true;
+            return new JSONObject().put("success", true);
         }
         if (channel.equals("fs-readdir") || channel.equals("list-directory")) {
             JSONArray list = new JSONArray();
@@ -357,11 +357,11 @@ public final class MainActivity extends Activity {
             File dest = safeFile(a.optString(1));
             if (dest.getParentFile() != null) dest.getParentFile().mkdirs();
             if (!src.renameTo(dest)) copyRecursively(src, dest);
-            return true;
+            return new JSONObject().put("success", true);
         }
         if (channel.equals("copy-file") || channel.equals("fs-copy")) {
             copyRecursively(safeFile(a.optString(0)), safeFile(a.optString(1)));
-            return true;
+            return new JSONObject().put("success", true);
         }
         if (channel.equals("show-open-dialog")) {
             String id = new AndroidBridge(source).requestProjectFolder(
@@ -379,7 +379,10 @@ public final class MainActivity extends Activity {
         if (channel.equals("read-tutorial-files")) return new JSONArray();
         if (channel.startsWith("git-") || channel.startsWith("packager-") ||
             channel.equals("check-node-env") || channel.startsWith("editor-") ||
-            channel.equals("preview-project") || channel.equals("galgame-package-project")) {
+            channel.equals("preview-project") || channel.equals("galgame-package-project") ||
+            channel.equals("call-ai") || channel.equals("ai-continue-chapter") ||
+            channel.equals("generate-ai-image") || channel.equals("test-ai-connection") ||
+            channel.equals("download-image-to-project")) {
             return new JSONObject().put("success", false)
                 .put("error", "This desktop-only feature is not available in the Android edition.");
         }
@@ -440,7 +443,8 @@ public final class MainActivity extends Activity {
         File metadata = new File(dir, "metadata.json");
         File projectFile = new File(dir, "project.json");
         JSONObject project = new JSONObject(new String(readBytes(metadata.isFile() ? metadata : projectFile), StandardCharsets.UTF_8));
-        project.put("path", dir.getAbsolutePath()).put("metadata", project);
+        JSONObject metadataCopy = new JSONObject(project.toString());
+        project.put("path", dir.getAbsolutePath()).put("metadata", metadataCopy);
         return new JSONObject().put("success", true).put("project", project).put("content", "");
     }
 

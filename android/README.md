@@ -12,6 +12,7 @@ gradle :app:assembleDebug
 ```
 
 The APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`. Android Studio can also open this directory as a Gradle project.
+The generated debug APK is also checked in at [`android/releases/ArtiMeow-Android-debug.apk`](releases/ArtiMeow-Android-debug.apk).
 
 ## Android-specific behavior
 

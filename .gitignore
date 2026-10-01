@@ -25,6 +25,7 @@ Thumbs.db
 # Build artifacts
 /dist/
 /build/
+/android/app/build/
 /out/
 coverage/
 
