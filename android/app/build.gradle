@@ -35,6 +35,9 @@ tasks.register("copyAndroidWebAssets", Sync) {
     from("../../node_modules/marked/lib/marked.umd.js") {
         into "node_modules/marked/lib"
     }
+    from("../../node_modules/marked/LICENSE.md") {
+        into "node_modules/marked"
+    }
 }
 
 tasks.named("preBuild").configure {
