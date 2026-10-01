@@ -1,0 +1,39 @@
+plugins {
+    id "com.android.application"
+}
+
+def generatedAssets = layout.buildDirectory.dir("generated/android-assets")
+
+android {
+    namespace "com.artimeow.android"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.artimeow.android"
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    sourceSets {
+        main.assets.srcDir(generatedAssets)
+    }
+}
+
+tasks.register("copyAndroidWebAssets", Sync) {
+    into generatedAssets
+    from("../lib/editor/src/renderer") {
+        into "editor"
+    }
+    from("../lib/player/src/renderer") {
+        into "player"
+    }
+    from("../lib/editor/tutorial") {
+        into "tutorial"
+    }
+}
+
+tasks.named("preBuild").configure {
+    dependsOn("copyAndroidWebAssets")
+}
