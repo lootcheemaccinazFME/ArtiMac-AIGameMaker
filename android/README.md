@@ -4,9 +4,10 @@ The Android app packages the existing Editor and Player web interfaces in a nati
 
 ## Build a debug APK
 
-Install Java 17+, Gradle, and the Android SDK (API 35), then run:
+Install Node.js, Java 17+, Gradle, and the Android SDK (API 35). Install the repository's dependencies from its root, then run:
 
 ```sh
+npm install
 cd android
 gradle :app:assembleDebug
 ```

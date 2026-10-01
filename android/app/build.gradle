@@ -32,6 +32,9 @@ tasks.register("copyAndroidWebAssets", Sync) {
     from("../lib/editor/tutorial") {
         into "tutorial"
     }
+    from("../../node_modules/marked/lib/marked.umd.js") {
+        into "node_modules/marked/lib"
+    }
 }
 
 tasks.named("preBuild").configure {

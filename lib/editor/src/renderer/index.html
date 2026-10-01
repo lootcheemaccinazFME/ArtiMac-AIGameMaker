@@ -1502,7 +1502,11 @@
     </div>
 
     <!-- 加载所有 JavaScript 文件 -->
-    <script src="../../../../node_modules/marked/lib/marked.umd.js"></script>
+    <script>
+        document.write(`<script src="${window.AndroidBridge
+            ? '../node_modules/marked/lib/marked.umd.js'
+            : '../../../../node_modules/marked/lib/marked.umd.js'}"><\/script>`);
+    </script>
     
     <!-- API适配器 - 必须在所有其他脚本之前加载 -->
     <script src="js/api-adapter.js"></script>
