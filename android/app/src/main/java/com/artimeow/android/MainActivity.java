@@ -222,9 +222,13 @@ public final class MainActivity extends Activity {
         public String invoke(String channel, String encodedArgs) {
             try {
                 JSONArray args = new JSONArray(encodedArgs);
-                return JSONObject.valueToString(handle(channel, args, webView));
+                return toJson(handle(channel, args, webView));
             } catch (Exception error) {
-                return JSONObject.valueToString(new JSONObject().put("success", false).put("error", error.getMessage()));
+                try {
+                    return toJson(new JSONObject().put("success", false).put("error", error.getMessage()));
+                } catch (Exception ignored) {
+                    return "{\"success\":false}";
+                }
             }
         }
 
@@ -449,7 +453,7 @@ public final class MainActivity extends Activity {
         return result;
     }
 
-    private JSONArray scanDirectory(File dir, boolean includeDirectories) {
+    private JSONArray scanDirectory(File dir, boolean includeDirectories) throws Exception {
         JSONArray result = new JSONArray();
         File[] files = dir.listFiles();
         if (files != null) for (File file : files) {
@@ -508,6 +512,13 @@ public final class MainActivity extends Activity {
 
     private void writeJson(File file, JSONObject value) throws Exception {
         writeBytes(file, (value == null ? "{}" : value.toString(2)).getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String toJson(Object value) {
+        if (value == null || value == JSONObject.NULL) return "null";
+        if (value instanceof JSONObject || value instanceof JSONArray) return value.toString();
+        if (value instanceof String) return JSONObject.quote((String) value);
+        return String.valueOf(value);
     }
 
     private byte[] readBytes(File file) throws Exception {
